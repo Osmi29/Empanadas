@@ -296,8 +296,18 @@ export async function getTopClients(limit: number = 20): Promise<Client[]> {
  * TODO: Reemplazar por fetch('/api/products')
  */
 export async function getProducts(): Promise<Product[]> {
-  await simulateDelay(400)
-  return mockProducts
+  try {
+    const response = await fetch('/api/products', { cache: 'no-store' })
+    if (!response.ok) {
+      throw new Error(`Products request failed with status ${response.status}`)
+    }
+
+    return (await response.json()) as Product[]
+  } catch (error) {
+    console.error('Error fetching products from API, using mock data:', error)
+    await simulateDelay(300)
+    return mockProducts
+  }
 }
 
 /**
@@ -307,8 +317,20 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductsByCategory(
   category: Product['category']
 ): Promise<Product[]> {
-  await simulateDelay(350)
-  return mockProducts.filter(p => p.category === category)
+  try {
+    const response = await fetch(`/api/products?category=${category}`, {
+      cache: 'no-store',
+    })
+    if (!response.ok) {
+      throw new Error(`Products by category failed with status ${response.status}`)
+    }
+
+    return (await response.json()) as Product[]
+  } catch (error) {
+    console.error('Error fetching products by category, using mock data:', error)
+    await simulateDelay(300)
+    return mockProducts.filter(p => p.category === category)
+  }
 }
 
 /**
@@ -316,10 +338,22 @@ export async function getProductsByCategory(
  * TODO: Reemplazar por fetch('/api/products/top-selling')
  */
 export async function getTopSellingProducts(limit: number = 10): Promise<Product[]> {
-  await simulateDelay(350)
-  return [...mockProducts]
-    .sort((a, b) => b.totalSold - a.totalSold)
-    .slice(0, limit)
+  try {
+    const response = await fetch(`/api/products?sort=top&limit=${limit}`, {
+      cache: 'no-store',
+    })
+    if (!response.ok) {
+      throw new Error(`Top products request failed with status ${response.status}`)
+    }
+
+    return (await response.json()) as Product[]
+  } catch (error) {
+    console.error('Error fetching top-selling products, using mock data:', error)
+    await simulateDelay(300)
+    return [...mockProducts]
+      .sort((a, b) => b.totalSold - a.totalSold)
+      .slice(0, limit)
+  }
 }
 
 // =============================================
@@ -390,8 +424,19 @@ export async function launchCampaign(
  * TODO: Reemplazar por fetch('/api/inventory')
  */
 export async function getInventory(): Promise<InventoryItem[]> {
-  await simulateDelay(400)
-  return mockInventory
+  try {
+    const response = await fetch('/api/inventory', { cache: 'no-store' })
+    if (!response.ok) {
+      throw new Error(`Inventory request failed with status ${response.status}`)
+    }
+
+    const data = (await response.json()) as InventoryItem[]
+    return data
+  } catch (error) {
+    console.error('Error fetching inventory from API, using mock data:', error)
+    await simulateDelay(300)
+    return mockInventory
+  }
 }
 
 /**
@@ -428,20 +473,41 @@ export async function getReviews(filters?: {
   isPositive?: boolean
   minRating?: number
 }): Promise<Review[]> {
-  await simulateDelay(400)
-  
-  let filteredReviews = [...mockReviews]
-  
-  if (filters?.isPositive !== undefined) {
-    filteredReviews = filteredReviews.filter(r => r.isPositive === filters.isPositive)
+  try {
+    const params = new URLSearchParams()
+    if (filters?.isPositive !== undefined) {
+      params.set('isPositive', String(filters.isPositive))
+    }
+    if (filters?.minRating) {
+      params.set('minRating', String(filters.minRating))
+    }
+
+    const query = params.toString()
+    const response = await fetch(`/api/reviews${query ? `?${query}` : ''}`, {
+      cache: 'no-store',
+    })
+    if (!response.ok) {
+      throw new Error(`Reviews request failed with status ${response.status}`)
+    }
+
+    return (await response.json()) as Review[]
+  } catch (error) {
+    console.error('Error fetching reviews from API, using mock data:', error)
+    await simulateDelay(300)
+
+    let filteredReviews = [...mockReviews]
+    if (filters?.isPositive !== undefined) {
+      filteredReviews = filteredReviews.filter(r => r.isPositive === filters.isPositive)
+    }
+    if (filters?.minRating) {
+      const minRating = filters.minRating
+      filteredReviews = filteredReviews.filter(r => r.productRating >= minRating)
+    }
+
+    return filteredReviews.sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
   }
-  if (filters?.minRating) {
-    filteredReviews = filteredReviews.filter(r => r.productRating >= filters.minRating!)
-  }
-  
-  return filteredReviews.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
 }
 
 /**
@@ -454,18 +520,33 @@ export async function getReviewStats(): Promise<{
   totalReviews: number
   positivePercentage: number
 }> {
-  await simulateDelay(350)
-  
-  const totalReviews = mockReviews.length
-  const avgProduct = mockReviews.reduce((sum, r) => sum + r.productRating, 0) / totalReviews
-  const avgDelivery = mockReviews.reduce((sum, r) => sum + r.deliveryRating, 0) / totalReviews
-  const positive = mockReviews.filter(r => r.isPositive).length
-  
-  return {
-    averageProductRating: Math.round(avgProduct * 10) / 10,
-    averageDeliveryRating: Math.round(avgDelivery * 10) / 10,
-    totalReviews,
-    positivePercentage: Math.round((positive / totalReviews) * 100),
+  try {
+    const response = await fetch('/api/reviews/stats', { cache: 'no-store' })
+    if (!response.ok) {
+      throw new Error(`Review stats failed with status ${response.status}`)
+    }
+
+    return (await response.json()) as {
+      averageProductRating: number
+      averageDeliveryRating: number
+      totalReviews: number
+      positivePercentage: number
+    }
+  } catch (error) {
+    console.error('Error fetching review stats from API, using mock data:', error)
+    await simulateDelay(300)
+
+    const totalReviews = mockReviews.length
+    const avgProduct = mockReviews.reduce((sum, r) => sum + r.productRating, 0) / totalReviews
+    const avgDelivery = mockReviews.reduce((sum, r) => sum + r.deliveryRating, 0) / totalReviews
+    const positive = mockReviews.filter(r => r.isPositive).length
+
+    return {
+      averageProductRating: Math.round(avgProduct * 10) / 10,
+      averageDeliveryRating: Math.round(avgDelivery * 10) / 10,
+      totalReviews,
+      positivePercentage: Math.round((positive / totalReviews) * 100),
+    }
   }
 }
 
@@ -487,11 +568,23 @@ export async function getPublicMetrics() {
  * TODO: Reemplazar por fetch('/api/public/featured-products')
  */
 export async function getFeaturedProducts(): Promise<Product[]> {
-  await simulateDelay(350)
-  return mockProducts
-    .filter(p => p.category === 'empanada')
-    .sort((a, b) => b.totalSold - a.totalSold)
-    .slice(0, 4)
+  try {
+    const response = await fetch('/api/public/featured-products', {
+      cache: 'no-store',
+    })
+    if (!response.ok) {
+      throw new Error(`Featured products request failed with status ${response.status}`)
+    }
+
+    return (await response.json()) as Product[]
+  } catch (error) {
+    console.error('Error fetching featured products from API, using mock data:', error)
+    await simulateDelay(300)
+    return mockProducts
+      .filter(p => p.category === 'empanada')
+      .sort((a, b) => b.totalSold - a.totalSold)
+      .slice(0, 4)
+  }
 }
 
 /**
@@ -499,8 +592,20 @@ export async function getFeaturedProducts(): Promise<Product[]> {
  * TODO: Reemplazar por fetch('/api/public/event-pricing')
  */
 export async function getEventPricing() {
-  await simulateDelay(300)
-  return mockEventPricing
+  try {
+    const response = await fetch('/api/public/event-pricing', {
+      cache: 'no-store',
+    })
+    if (!response.ok) {
+      throw new Error(`Event pricing request failed with status ${response.status}`)
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching event pricing from API, using mock data:', error)
+    await simulateDelay(300)
+    return mockEventPricing
+  }
 }
 
 /**
@@ -517,8 +622,20 @@ export async function getTeamMembers() {
  * TODO: Reemplazar por fetch('/api/public/reviews')
  */
 export async function getPublicReviews(): Promise<Review[]> {
-  await simulateDelay(350)
-  return mockReviews
-    .filter(r => r.isPositive)
-    .slice(0, 6)
+  try {
+    const response = await fetch('/api/public/reviews', {
+      cache: 'no-store',
+    })
+    if (!response.ok) {
+      throw new Error(`Public reviews request failed with status ${response.status}`)
+    }
+
+    return (await response.json()) as Review[]
+  } catch (error) {
+    console.error('Error fetching public reviews from API, using mock data:', error)
+    await simulateDelay(300)
+    return mockReviews
+      .filter(r => r.isPositive)
+      .slice(0, 6)
+  }
 }
