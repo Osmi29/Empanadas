@@ -17,19 +17,20 @@ const socialLinks = [
 
 const footerLinks = {
   productos: [
-    { label: 'Empanada de Carne', href: '#productos' },
-    { label: 'Empanada de Pollo', href: '#productos' },
-    { label: 'Empanada Mixta', href: '#productos' },
-    { label: 'Empanada Vegetariana', href: '#productos' },
+    { label: 'Empanada de Carne', href: '/#productos' },
+    { label: 'Empanada de Pollo', href: '/#productos' },
+    { label: 'Empanada Mixta', href: '/#productos' },
+    { label: 'Empanada Vegetariana', href: '/#productos' },
   ],
   servicios: [
-    { label: 'Pedidos Individuales', href: '#servicios' },
-    { label: 'Pedidos para Eventos', href: '#eventos' },
-    { label: 'Cotizaciones', href: '#eventos' },
+    { label: 'Pedidos Individuales', href: '/#servicios' },
+    { label: 'Pedidos para Eventos', href: '/#eventos' },
+    { label: 'Cotizaciones', href: '/#eventos' },
+    { label: 'Portal para Repartidores', href: '/repartidores' },
   ],
   contacto: [
     { label: 'WhatsApp', href: `https://wa.me/${WHATSAPP_NUMBER}` },
-    { label: 'Ciudad Juárez, Chihuahua', href: '#' },
+    { label: 'Ciudad Juarez, Chihuahua', href: '#' },
     { label: 'info@empanadas.mx', href: 'mailto:info@empanadas.mx' },
   ],
 }
@@ -39,7 +40,6 @@ export function Footer() {
     <footer className="border-t border-border bg-card">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid gap-8 lg:grid-cols-4">
-          {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
@@ -50,10 +50,9 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">
-              Las mejores empanadas colombianas en Ciudad Juárez. Hechas con amor y
+              Las mejores empanadas colombianas en Ciudad Juarez. Hechas con amor y
               la receta tradicional de la abuela.
             </p>
-            {/* Social Links */}
             <div className="mt-6 flex gap-4">
               {socialLinks.map((social) => {
                 const Icon = social.icon
@@ -73,7 +72,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Links */}
           <div className="grid gap-8 sm:grid-cols-3 lg:col-span-3">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Productos</h3>
@@ -125,7 +123,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom */}
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Empanadas JRZ. Todos los derechos

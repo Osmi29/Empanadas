@@ -2,27 +2,47 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { ArrowLeft, Menu, MessageCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Menu, X, MessageCircle } from 'lucide-react'
 
-const navLinks = [
+const homeNavLinks = [
   { href: '#servicios', label: 'Servicios' },
   { href: '#productos', label: 'Productos' },
   { href: '#eventos', label: 'Eventos' },
   { href: '#equipo', label: 'Equipo' },
   { href: '#opiniones', label: 'Opiniones' },
+  { href: '/repartidores', label: 'Repartidores' },
 ]
 
-const WHATSAPP_NUMBER = '526561234567' // TODO: Reemplazar con número real
-const WHATSAPP_MESSAGE = encodeURIComponent('¡Hola! Quiero hacer un pedido de empanadas')
+const driverNavLinks = [
+  { href: '/#servicios', label: 'Menú' },
+  { href: '#flujo', label: 'Flujo' },
+  { href: '#ingresos', label: 'Ganancias' },
+  { href: '#requisitos', label: 'Requisitos' },
+  { href: '#faq', label: 'FAQ' },
+]
+
+const WHATSAPP_NUMBER = '526561234567' // TODO: Reemplazar con numero real
+const WHATSAPP_ORDER_MESSAGE = encodeURIComponent(
+  'Hola, quiero hacer un pedido de empanadas'
+)
+const WHATSAPP_DRIVER_MESSAGE = encodeURIComponent(
+  'Hola, quiero registrarme como repartidor de Empanadas JRZ'
+)
 
 export function LandingHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const isDriverPage = pathname === '/repartidores'
+  const navLinks = isDriverPage ? driverNavLinks : homeNavLinks
+  const whatsappMessage = isDriverPage
+    ? WHATSAPP_DRIVER_MESSAGE
+    : WHATSAPP_ORDER_MESSAGE
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <span className="text-lg font-bold text-primary-foreground">E</span>
@@ -32,7 +52,6 @@ export function LandingHeader() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => (
             <Link
@@ -45,27 +64,33 @@ export function LandingHeader() {
           ))}
         </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-3 md:flex">
+          {isDriverPage && (
+            <Button asChild variant="outline" className="gap-2">
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4" />
+                Volver al inicio
+              </Link>
+            </Button>
+          )}
           <Button asChild className="gap-2">
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <MessageCircle className="h-4 w-4" />
-              Ordenar ahora
+              {isDriverPage ? 'Aplicar ahora' : 'Ordenar ahora'}
             </a>
           </Button>
         </div>
 
-        {/* Mobile Menu Button */}
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-md p-2 text-foreground md:hidden"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          <span className="sr-only">Abrir menú</span>
+          <span className="sr-only">Abrir menu</span>
           {isMobileMenuOpen ? (
             <X className="h-6 w-6" />
           ) : (
@@ -74,7 +99,6 @@ export function LandingHeader() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="border-t border-border bg-background md:hidden">
           <nav className="flex flex-col gap-1 px-4 py-4">
@@ -89,14 +113,22 @@ export function LandingHeader() {
               </Link>
             ))}
             <div className="mt-4 border-t border-border pt-4">
+              {isDriverPage && (
+                <Button asChild variant="outline" className="mb-3 w-full gap-2">
+                  <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                    <ArrowLeft className="h-4 w-4" />
+                    Volver al inicio
+                  </Link>
+                </Button>
+              )}
               <Button asChild className="w-full gap-2">
                 <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`}
+                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <MessageCircle className="h-4 w-4" />
-                  Ordenar ahora
+                  {isDriverPage ? 'Aplicar ahora' : 'Ordenar ahora'}
                 </a>
               </Button>
             </div>
